@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ProcessM.Core/ProcessM.Core.csproj" />
+  <Project Path="ProcessManager.Tests/ProcessManager.Tests.csproj" />
+  <Project Path="ProcessManager/ProcessManager.csproj" />
+</Solution>

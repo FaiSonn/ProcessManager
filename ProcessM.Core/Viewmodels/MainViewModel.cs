@@ -1,81 +1,63 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using ProcessM.Core.Models;
 using ProcessM.Core.Services;
+using System.Diagnostics;
+using System;
 
 namespace ProcessM.Core.ViewModels
 {
-    public class MainViewModel : BaseViewModel
+    public class MainViewModel
     {
-        private readonly IProcessService _service;
+        private readonly ProcessService _service; // конкретный тип нужен для BuildProcessTree
 
-        public ObservableCollection<ProcessTreeNode> Processes { get; }
-            = new ObservableCollection<ProcessTreeNode>();
+        public ObservableCollection<ProcessInfo> Processes { get; set; }
+        public ObservableCollection<ProcessInfo> ProcessTree { get; set; }
+        public ProcessInfo SelectedProcess { get; set; }
 
-        private ProcessTreeNode _selectedProcess;
-
-        public ProcessTreeNode SelectedProcess
-        {
-            get => _selectedProcess;
-            set
-            {
-                _selectedProcess = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public MainViewModel() : this(new ProcessService()) { }
-
-        public MainViewModel(IProcessService service)
+        public MainViewModel(ProcessService service) // конкретный тип
         {
             _service = service;
+            Processes = new ObservableCollection<ProcessInfo>();
+            ProcessTree = new ObservableCollection<ProcessInfo>();
         }
 
         public async Task RefreshAsync()
         {
             var processList = await Task.Run(() => _service.GetProcesses());
+            var tree = _service.BuildProcessTree(processList);
 
-            var uiList = processList.Select(p => new ProcessTreeNode
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Memory = p.MemoryUsage,
-                Priority = p.Priority
-            }).ToList();
+            Processes.Clear();
+            ProcessTree.Clear();
 
-            SyncCollection(uiList);
-        }
+            foreach (var proc in processList)
+                Processes.Add(proc);
 
-        public void SyncCollection(
-            System.Collections.Generic.List<ProcessTreeNode> newList)
-        {
-            foreach (var proc in newList)
-            {
-                var existing = Processes.FirstOrDefault(p => p.Id == proc.Id);
-
-                if (existing == null)
-                    Processes.Add(proc);
-                else
-                {
-                    existing.Memory = proc.Memory;
-                    existing.Name = proc.Name;
-                    existing.Priority = proc.Priority;
-                }
-            }
+            foreach (var root in tree)
+                ProcessTree.Add(root);
         }
 
         public void KillSelected()
         {
-            if (SelectedProcess != null)
-                _service.KillProcess(SelectedProcess.Id);
+            if (SelectedProcess == null) return;
+            int id = SelectedProcess.Id;
+            _service.KillProcess(id);
+            var item = Processes.FirstOrDefault(x => x.Id == id);
+            if (item != null) Processes.Remove(item);
         }
 
         public void ChangePriority(ProcessPriorityClass priority)
         {
-            if (SelectedProcess != null)
-                _service.SetPriority(SelectedProcess.Id, priority);
+            if (SelectedProcess == null) return;
+            _service.SetPriority(SelectedProcess.Id, priority);
+        }
+
+        public void SetAffinity(bool[] cores)
+        {
+            if (SelectedProcess == null) return;
+            var mask = AffinityHelper.BuildMask(cores);
+            _service.SetAffinity(SelectedProcess.Id, mask);
         }
     }
 }

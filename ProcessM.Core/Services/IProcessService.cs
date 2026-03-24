@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using ProcessM.Core.Models;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using ProcessM.Core.Models;
 
 namespace ProcessM.Core.Services
 {
@@ -9,6 +10,8 @@ namespace ProcessM.Core.Services
         List<ProcessInfo> GetProcesses();
 
         void KillProcess(int id);
+
+        void SetAffinity(int id, IntPtr mask);
 
         void SetPriority(int id, ProcessPriorityClass priority);
     }

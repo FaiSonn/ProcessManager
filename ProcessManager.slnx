@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="ProcessM.Core/ProcessM.Core.csproj" />
+  <Project Path="ProcessM.Core/ProcessM.Core.csproj" Id="d65620ee-a3a8-43d7-8990-c37dfecba0d3" />
   <Project Path="ProcessManager.Tests/ProcessManager.Tests.csproj" />
-  <Project Path="ProcessManager/ProcessManager.csproj" />
+  <Project Path="ProcessManager/ProcessManager.csproj" Id="08949689-d9fe-44de-b414-669683d3c677" />
 </Solution>

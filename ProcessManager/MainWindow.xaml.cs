@@ -57,7 +57,7 @@ namespace ProcessManager
             _vm.ChangePriority(priority);
         }
 
-        // 
+        // funny commit
         private void CreateCpuCoresUI()
         {
             int coreCount = Environment.ProcessorCount;
